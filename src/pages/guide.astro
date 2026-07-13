@@ -1,0 +1,226 @@
+---
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+const title = 'How Deckle was built — the guide';
+---
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script is:inline>
+  try { var t = localStorage.getItem('deckle-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<title>{title}</title>
+<meta name="description" content="Build notes for Deckle: a page-wide paper ruling swapped with pure CSS :has(), a pen-pressure doodle canvas where line weight follows pointer speed, and shipping an Astro site to GitHub Pages from /docs." />
+<meta name="theme-color" content="#ece3d1" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 5 h17 l1.5 2 -1 2.4 1.4 2.6 -1.2 2.4 1.2 2.6 -1.4 2.4 1.2 2.6 -1.2 2.4 1 2.6 -1.5 2 h-17 Z' fill='%23ece3d1' stroke='%2314171f' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M10 12 h9 M10 17 h9 M10 22 h6' stroke='%232b3a67' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E`} />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Karla:ital,wght@0,400..800;1,400..700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ease: cubic-bezier(.3, .02, .18, 1.04);
+  --hl: #f2c14e;
+  --max: 760px;
+}
+:root[data-theme="light"] {
+  --bg: #ece3d1; --page: #f7f1e3; --ink: #14171f; --dim: #464c5c; --faint: #676c7a;
+  --accent: #7a5b06; --blue: #2b3a67; --line: rgba(20, 23, 31, .16);
+  --code-bg: #14171f; --code-ink: #ece3d1;
+}
+:root[data-theme="dark"] {
+  --bg: #14171f; --page: #1e2430; --ink: #ece3d1; --dim: #b7b0a0; --faint: #83879a;
+  --accent: #f2c14e; --blue: #9db1e3; --line: rgba(236, 227, 209, .14);
+  --code-bg: #0e1118; --code-ink: #ece3d1;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: "Karla", system-ui, sans-serif; line-height: 1.66;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  background-image: radial-gradient(color-mix(in oklab, var(--ink) 10%, transparent) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+a { color: var(--accent); }
+::selection { background: var(--hl); color: #14171f; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: clamp(30px, 6vw, 84px) clamp(18px, 5vw, 32px); }
+.top {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 3.2rem;
+  font-family: "Space Mono", monospace; font-size: .72rem; letter-spacing: .12em; color: var(--faint);
+}
+.top a { color: var(--dim); text-decoration: none; }
+.top a:hover { color: var(--accent); }
+.ey {
+  font-family: "Space Mono", monospace; font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--accent); display: block; margin-bottom: 2.2rem;
+}
+h1 {
+  font-family: "Fraunces", Georgia, serif; font-weight: 480; font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1.05; letter-spacing: -.015em; margin-bottom: .7rem;
+}
+h1 em {
+  font-style: italic;
+  background-image: linear-gradient(transparent 52%, color-mix(in srgb, var(--hl) 82%, transparent) 52%, color-mix(in srgb, var(--hl) 82%, transparent) 94%, transparent 94%);
+}
+.sub { color: var(--dim); font-size: 1.1rem; margin-bottom: 3rem; max-width: 56ch; }
+h2 {
+  font-family: "Fraunces", Georgia, serif; font-weight: 520; font-size: clamp(1.5rem, 3.6vw, 2rem);
+  margin: 3rem 0 1rem; letter-spacing: -.01em;
+}
+p { color: var(--dim); margin: 1rem 0; }
+strong { color: var(--ink); font-weight: 700; }
+ul { margin: 1rem 0 1rem 1.2rem; color: var(--dim); }
+li { margin: .45rem 0; }
+pre {
+  background: var(--code-bg); color: var(--code-ink); border-radius: 14px; padding: 18px 20px;
+  overflow-x: auto; margin: 1.3rem 0; font-family: "Space Mono", monospace; font-size: .8rem; line-height: 1.7;
+}
+code { font-family: "Space Mono", monospace; font-size: .88em; color: var(--accent); }
+pre code { color: inherit; }
+.rule { border: 0; border-top: 1px dashed var(--line); margin: 3rem 0; }
+.back {
+  display: inline-block; margin-top: 2.6rem; font-family: "Space Mono", monospace; font-size: .8rem;
+  border: 1.5px solid var(--ink); border-radius: 11px; padding: 10px 20px; color: var(--ink);
+  text-decoration: none; transition: background .4s var(--ease), color .4s var(--ease);
+}
+.back:hover { background: var(--ink); color: var(--bg); }
+.fine { color: var(--faint); font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href={base}>← Deckle</a>
+    <span>THE GUIDE · HOW IT WAS BUILT</span>
+  </div>
+
+  <span class="ey">Design showcase · build notes</span>
+  <h1>The whole site is <em>one sheet.</em></h1>
+  <p class="sub">Deckle is a light-first Astro site for a fictional paper mill. Its two signature
+    moves are the same idea from two directions: the page itself is a sheet of paper you can
+    re-rule — blank, dot, ruled, graph — and a scratch-pad canvas where line weight follows the
+    speed of your hand, like a wet nib on rag.</p>
+
+  <h2>The idea</h2>
+  <p>A stationery brand sells the feeling of good paper: tooth, weight, a ragged edge, ink that
+    sits up instead of feathering. Screens have none of that, so Deckle fakes the physics
+    honestly. The background is a fixed “substrate” carrying the current ruling; the hero
+    notebook, the doodle pad and the substrate all read the <strong>same CSS custom
+    properties</strong>, so flipping the ruling re-rules everything at once — hero and all.
+    Kraft is the daylight theme (<code>#ece3d1</code>), ink-blue the after-hours one
+    (<code>#14171f</code>), and the only loud colour on the site is a highlighter
+    (<code>#f2c14e</code>) used exactly the way a highlighter is: in swipes.</p>
+
+  <h2>The stack — why Astro</h2>
+  <ul>
+    <li><strong>Astro 5, zero client framework.</strong> Six products, four rulings, seven mill
+      facts — that's data, not state. It lives as arrays in the frontmatter of
+      <code>index.astro</code> and renders to plain HTML at build time. One inline vanilla
+      script carries every interaction.</li>
+    <li><strong>Components without a runtime.</strong> The product line-art and the mould-and-deckle
+      diagram are <code>.astro</code> components — reusable at author time, free at run time.</li>
+    <li><strong>Fraunces / Karla / Space Mono.</strong> Fraunces has the bookish warmth of a
+      letterpress specimen; Karla is plain-spoken enough not to compete with the paper; Space Mono
+      does the ledger work — specs, gsm counts, till receipts.</li>
+  </ul>
+
+  <h2>Signature technique #1 — re-ruling the page with <code>:has()</code></h2>
+  <p>The paper toggle is a plain radio group. No JavaScript swaps the pattern — a
+    <code>body:has()</code> selector watches which radio is checked and rewrites two custom
+    properties; everything with the ruling (the fixed substrate, the hero notebook, the doodle
+    pad) just inherits them:</p>
+  <pre><code>body:has(#pm-dot:checked) &#123;
+  --paper-img: radial-gradient(var(--rule) 1px, transparent 1.4px);
+  --paper-size: 22px 22px;
+&#125;
+body:has(#pm-ruled:checked) &#123;
+  --paper-img: linear-gradient(to bottom,
+      transparent calc(100% - 1px), var(--rule) calc(100% - 1px));
+  --paper-size: 100% 2rem;
+&#125;
+
+.paper, .substrate &#123;
+  background-image: var(--paper-img);
+  background-size: var(--paper-size);
+&#125;
+
+/* the red margin only exists when the sheet is ruled */
+body:has(#pm-ruled:checked) .margin-line &#123; opacity: .75; &#125;</code></pre>
+  <p>Because it's CSS, the swap works with JavaScript disabled and under
+    <code>prefers-reduced-motion</code> — a swap isn't motion. The ruling colour is
+    <code>color-mix(in oklab, var(--ink) 11%, transparent)</code>, so it re-tints itself when
+    the theme flips. JS's only job is remembering your choice in <code>localStorage</code>.</p>
+
+  <h2>Signature technique #2 — a nib that answers your hand</h2>
+  <p>The scratch pad has no pressure API to lean on, so it uses the oldest proxy there is:
+    <strong>speed</strong>. A slow hand lets ink pool; a fast one starves the line. Each
+    <code>pointermove</code> measures velocity in px/ms and eases the stroke width toward an
+    exponential of it:</p>
+  <pre><code>function nibWidth(v) &#123;            // v — pointer speed, px/ms
+  var target = 1 + (6.5 - 1) * Math.exp(-v / 0.55);
+  lastW += (target - lastW) * 0.3; // the swell, not the jitter
+  return lastW;
+&#125;
+
+pad.addEventListener('pointermove', function (e) &#123;
+  var dist = Math.hypot(p.x - lastPt.x, p.y - lastPt.y);
+  if (dist &lt; 1.4) return;         // ignore micro-tremor
+  var v = dist / Math.max(1, e.timeStamp - lastT);
+  cur.pts.push(&#123; x: p.x, y: p.y, w: nibWidth(v) &#125;);
+  segment(...);                    // quadratic through midpoints
+&#125;);</code></pre>
+  <p>Strokes are stored as point lists, not pixels, so the pad survives a resize and even a theme
+    toggle — flip to dark and your doodle redraws in kraft-coloured ink. There is no idle
+    animation loop: the canvas only paints on input, and the DPR is capped at 1.5. When the desk
+    scrolls into view a sample flourish writes itself — its points are spaced unevenly, so the
+    same nib model gives it genuine thick-and-thin. Under reduced motion that flourish renders as
+    one static frame, drawing itself in exactly zero milliseconds.</p>
+
+  <h2>Details that matter</h2>
+  <ul>
+    <li><strong>The deckle edge is a clip-path.</strong> The hero notebook's fore-edge is a
+      30-point polygon with hand-jittered x-values — torn, not cut. The till receipt gets the
+      same treatment along its tail.</li>
+    <li><strong>The highlighter earns its hex.</strong> <code>#f2c14e</code> fails contrast as
+      text on kraft, so it never sets type — it sits <em>behind</em> type as a swipe
+      (<code>linear-gradient</code> under the display italics), and the token that writes small
+      accents is a darkened ochre that passes 4.5:1.</li>
+    <li><strong>Nothing hides without JS.</strong> A <code>.js</code> class added synchronously
+      in <code>&lt;head&gt;</code> gates every reveal and the hero's clipped-line intro; counters
+      ship their final numbers in the markup and only count up when scripting exists.</li>
+    <li><strong>Reduced motion is a full dialect,</strong> not a mute button: reveals arrive
+      finished, the hero stands still, the nib draws at a fixed width (no eased swell), and the
+      sample flourish is a single painted frame.</li>
+    <li><strong>The till is a demo and says so</strong> — it validates, totals honestly
+      (postage rules included), confirms in place, and sends nothing anywhere.</li>
+  </ul>
+
+  <h2>Ship it on GitHub Pages</h2>
+  <p>Astro builds static HTML, so Pages serves it straight from the repo — no Actions workflow.
+    Two config lines do the work:</p>
+  <pre><code>// astro.config.mjs
+export default defineConfig(&#123;
+  site: 'https://bswxyz.github.io',
+  base: '/deckle',      // project-site path prefix
+  outDir: './docs',     // Pages serves main + /docs
+&#125;);</code></pre>
+  <p>Every internal link goes through <code>import.meta.env.BASE_URL</code> so nothing 404s under
+    the <code>/deckle/</code> prefix, a <code>.nojekyll</code> in <code>public/</code> keeps
+    Pages from mangling the output, and deploying is:</p>
+  <pre><code>npm run build                      # emits ./docs
+git add -A &amp;&amp; git commit -m "first pull off the mould"
+gh repo create bswxyz/deckle --public --source . --push
+gh api --method POST /repos/bswxyz/deckle/pages \
+  -f 'source[branch]=main' -f 'source[path]=/docs'</code></pre>
+
+  <hr class="rule" />
+  <p class="fine">Deckle is a design-showcase concept — the mill, the prices and the Thursday post
+    van are fiction, and the till sends nothing. The repository README maps what a production
+    version would need.</p>
+  <a class="back" href={base}>← Back to the mill</a>
+</div>
+</body>
+</html>

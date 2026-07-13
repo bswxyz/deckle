@@ -1,0 +1,657 @@
+---
+import '../styles/global.css';
+import RangeArt from '../components/RangeArt.astro';
+import MouldDiagram from '../components/MouldDiagram.astro';
+
+const rawBase = import.meta.env.BASE_URL;
+const base = rawBase.endsWith('/') ? rawBase : rawBase + '/';
+
+const paperModes = [
+  { id: 'pm-blank', value: 'blank', label: 'Blank' },
+  { id: 'pm-dot', value: 'dot', label: 'Dot grid', checked: true },
+  { id: 'pm-ruled', value: 'ruled', label: 'Ruled' },
+  { id: 'pm-graph', value: 'graph', label: 'Graph' },
+];
+
+const paperNotes = [
+  { mode: 'blank', head: 'Blank.', body: 'No guidance at all, on purpose. For ideas that arrive sideways and refuse to sit on a line.', spec: '120 gsm · vellum finish · takes pencil like a wall takes chalk' },
+  { mode: 'dot', head: 'Dot grid, 5 mm.', body: 'The quietest possible suggestion of order. Lines when you squint, freedom when you don’t.', spec: '120 gsm · our house ruling · dots at 6% ink, printed after sizing' },
+  { mode: 'ruled', head: 'Ruled, 8 mm.', body: 'With a proper red margin, because a page should keep its accounts. Wide enough for a real hand.', spec: '120 gsm · feint lines · margin at 32 mm, the ledger standard' },
+  { mode: 'graph', head: 'Graph, 4 mm.', body: 'For people whose ideas have dimensions. Light enough to disappear under a 2B pencil.', spec: '120 gsm · engineer’s grid · no heavy fifth line, you’re welcome' },
+];
+
+const goods = [
+  { kind: 'everyday', name: 'The Everyday', price: '£24',
+    spec: 'A5 · 120 gsm cotton · dot grid · 192 pp',
+    note: 'Thread-sewn to lie flat at page one and page one-ninety-two. The notebook the mill itself runs on.',
+    tag: 'in stock', tagClass: 'tag--stock' },
+  { kind: 'pocket', name: 'Pocket Deckle', price: '£14',
+    spec: 'A6 · 90 gsm · blank · 64 pp · saddle-sewn',
+    note: 'Lives in a back pocket and improves with the abuse. Blank, because good ideas rarely arrive ruled.',
+    tag: 'in stock', tagClass: 'tag--stock' },
+  { kind: 'ledger', name: 'The Ledger', price: '£38',
+    spec: 'A4 hardback · ruled 8 mm · red margin · 240 pp',
+    note: 'Cloth spine, ribbon marker, a margin that means it. For lists, accounts, and grudges kept neatly.',
+    tag: 'small batch', tagClass: 'tag--batch' },
+  { kind: 'drafting', name: 'The Drafting Pad', price: '£18',
+    spec: 'A4 pad · 4 mm graph · 70 sheets · tear-off',
+    note: 'Perforated to tear clean at the top, which matters more than anyone admits. Takes fineliner without ghosting.',
+    tag: 'in stock', tagClass: 'tag--stock' },
+  { kind: 'pen', name: 'The Brass Nib', price: '£68',
+    spec: 'piston-fill fountain pen · fine steel nib',
+    note: 'Warms to hand temperature inside a minute and outlives its owner. Tuned wet, for paper that can take it.',
+    tag: 'made to order', tagClass: 'tag--order' },
+  { kind: 'ink', name: 'Iron Gall No.9', price: '£16',
+    spec: '50 ml bottled ink · blue-black · waterproof',
+    note: 'Goes on grey-blue and oxidises to near-black by evening. Your notes age the way the day did.',
+    tag: 'in stock', tagClass: 'tag--stock' },
+];
+
+const millFacts = [
+  ['Founded', '1949'],
+  ['Furnish', '100% cotton rag'],
+  ['Beater', 'Hollander, 1962'],
+  ['Weights', '90–300 gsm'],
+  ['Sizing', 'tub, gelatin'],
+  ['Loft-dried', '11 days'],
+  ['Feathering', 'none at 0.5 mm'],
+];
+
+const cartItems = [
+  { value: 'everyday', label: 'The Everyday — A5 dot grid', price: 24 },
+  { value: 'pocket', label: 'Pocket Deckle — A6 blank', price: 14 },
+  { value: 'ledger', label: 'The Ledger — A4 ruled', price: 38 },
+  { value: 'drafting', label: 'The Drafting Pad — A4 graph', price: 18 },
+  { value: 'pen', label: 'The Brass Nib — fountain pen', price: 68 },
+  { value: 'ink', label: 'Iron Gall No.9 — 50 ml', price: 16 },
+];
+
+const title = 'Deckle — mould-made notebooks & fine paper goods';
+const description = 'Deckle is a small mill making cotton-rag notebooks, pads and inks — mould-made sheets with true deckle edges, sized so a wet nib never feathers. Pick a paper, make a mark.';
+---
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script is:inline>
+  document.documentElement.classList.add('js');
+  try { var t = localStorage.getItem('deckle-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="theme-color" content="#ece3d1" />
+<meta name="color-scheme" content="light dark" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<link rel="icon" href={`data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 5 h17 l1.5 2 -1 2.4 1.4 2.6 -1.2 2.4 1.2 2.6 -1.4 2.4 1.2 2.6 -1.2 2.4 1 2.6 -1.5 2 h-17 Z' fill='%23ece3d1' stroke='%2314171f' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='M10 12 h9 M10 17 h9 M10 22 h6' stroke='%232b3a67' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E`} />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Karla:ital,wght@0,400..800;1,400..700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+<div class="substrate paper-fixed" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="brand" href={base} aria-label="Deckle home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <path d="M6 5 h17 l1.5 2 -1 2.4 1.4 2.6 -1.2 2.4 1.2 2.6 -1.4 2.4 1.2 2.6 -1.2 2.4 1 2.6 -1.5 2 h-17 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M10 12 h9 M10 17 h9 M10 22 h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>
+    </svg>
+    <span class="brand-word">Deckle</span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="#desk">The desk</a>
+    <a href="#range">The range</a>
+    <a href="#mill">The mill</a>
+    <a href={`${base}guide/`}>Guide</a>
+    <a class="nav-cta" href="#counter">The counter</a>
+    <button id="themeBtn" class="theme-btn" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Toggle light / dark">
+      <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><g stroke-linecap="round"><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></g></svg>
+      <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ============ hero — the open notebook ============ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow mono">[ Fine paper goods · mould-made since 1949 ]</p>
+        <h1 id="hero-title" class="hero-title">
+          <span class="line"><span>Ink dries.</span></span>
+          <span class="line"><span>Paper</span></span>
+          <span class="line"><span><em>remembers.</em></span></span>
+        </h1>
+        <p class="hero-sub">Deckle is a small mill making cotton-rag notebooks, pads and inks —
+          sheets pulled one at a time on a brass mould, edges left ragged where the pulp seeped
+          under the frame. Slow to make. Slower to fill. That&rsquo;s the point.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#range">Feel the range</a>
+          <a class="btn btn-ghost" href="#desk">Try the paper →</a>
+        </div>
+        <dl class="hero-facts">
+          <div><dt>Cotton rag</dt><dd><span class="c-num" data-to="100">100</span>%</dd></div>
+          <div><dt>House weight</dt><dd><span class="c-num" data-to="120">120</span> gsm</dd></div>
+          <div><dt>Loft-dried</dt><dd><span class="c-num" data-to="11">11</span> days</dd></div>
+        </dl>
+      </div>
+
+      <figure class="book" aria-labelledby="book-cap">
+        <div class="book-pages">
+          <div class="page page-left" aria-hidden="true">
+            <svg class="page-art" viewBox="0 0 240 150" aria-hidden="true" focusable="false">
+              <!-- three ink swells: 90 / 120 / 300 gsm -->
+              <path d="M28 38 q40 -8 96 -4 q30 2 52 6 q6 1 4 4 q-40 4 -96 2 q-34 -1 -56 -4 q-3 -2 0 -4 Z" fill="var(--blue)" opacity=".8" />
+              <path d="M28 78 q46 -9 104 -4 q26 2 44 6 q7 2 4 5 q-44 5 -100 2 q-30 -2 -52 -5 q-4 -2 0 -4 Z" fill="var(--blue)" opacity=".62" />
+              <path d="M28 118 q50 -8 108 -3 q24 2 40 5 q6 2 3 5 q-46 5 -102 2 q-28 -2 -49 -5 q-3 -2 0 -4 Z" fill="var(--blue)" opacity=".45" />
+              <g font-family="Space Mono, monospace" font-size="9" fill="var(--faint)" letter-spacing="1">
+                <text x="188" y="34">90 GSM</text>
+                <text x="188" y="74">120 GSM</text>
+                <text x="188" y="114">300 GSM</text>
+              </g>
+            </svg>
+            <span class="page-no mono" aria-hidden="true">14</span>
+          </div>
+          <div class="page page-right">
+            <span class="margin-line" aria-hidden="true"></span>
+            <svg class="page-art" viewBox="0 0 240 150" aria-hidden="true" focusable="false">
+              <path d="M30 96 q22 -44 34 -22 q8 16 -8 18 q-14 2 -4 -14 q16 -28 36 -18 q22 11 44 2 q26 -10 48 4 q14 9 30 4"
+                fill="none" stroke="var(--pen, currentColor)" stroke-width="2.6" stroke-linecap="round" opacity=".85" />
+              <path d="M154 52 l6 -18 M170 54 l10 -16" stroke="var(--hl)" stroke-width="7" stroke-linecap="round" opacity=".8" />
+            </svg>
+            <p class="page-note mono">wet nib, 0.5 mm — no feathering, no ghosting</p>
+            <span class="page-no mono" aria-hidden="true">15</span>
+          </div>
+          <span class="stitch" aria-hidden="true"></span>
+        </div>
+        <figcaption id="book-cap" class="book-cap mono">
+          <span>No. 04 — “The Everyday” · lies flat</span>
+          <span>120 gsm cotton · thread-sewn</span>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="hero-scroll mono" aria-hidden="true">scroll — the desk is set</p>
+  </section>
+
+  <!-- ============ the desk — paper toggle + doodle pad ============ -->
+  <section id="desk" class="desk">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker mono reveal">[ The desk ]</p>
+        <h2 class="reveal">Pick a paper. <em>Make a mark.</em></h2>
+        <p class="lede reveal">Every ruling we print, live on this page — flip the sheet and the whole
+          site re-rules, hero and all. Then try the nib: the pad below is real. Move slow and the line
+          runs wet; move quick and it goes lean.</p>
+      </div>
+
+      <div class="desk-grid">
+        <div class="reveal">
+          <form aria-label="Paper ruling">
+            <fieldset class="pm-set">
+              <legend>The ruling</legend>
+              <div class="pm-chips">
+                {paperModes.map((m) => (
+                  <label class="pm-chip">
+                    <input type="radio" name="paper" id={m.id} value={m.value} checked={m.checked} />
+                    <span>{m.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </form>
+          <div class="pm-notes" aria-live="polite">
+            {paperNotes.map((n) => (
+              <p class={`pm-note pm-note--${n.mode}`}><strong>{n.head}</strong> {n.body}
+                <span class="mono">{n.spec}</span></p>
+            ))}
+          </div>
+          <div class="desk-tools">
+            <button id="penInk" class="tool-btn" type="button" aria-pressed="true">Fine nib</button>
+            <button id="penHl" class="tool-btn tool-btn--hl" type="button" aria-pressed="false">Highlighter</button>
+            <button id="padClear" class="tool-btn" type="button">Tear off the page</button>
+          </div>
+          <p class="desk-fine mono">Line weight follows your hand — the slower the stroke, the
+            wetter the line. Same as a real nib on rag paper.</p>
+        </div>
+
+        <div class="reveal">
+          <div class="pad-wrap" id="padWrap">
+            <span class="margin-line" aria-hidden="true"></span>
+            <canvas id="pad" aria-label="Scratch pad — draw here with your mouse, finger or stylus">
+              A scratch pad for doodling. Your browser can&rsquo;t show it — picture a fresh sheet.
+            </canvas>
+            <span class="pad-hint mono" aria-hidden="true">draw here — slow for wet, quick for lean</span>
+          </div>
+          <p class="pad-cap mono">
+            <span>the scratch pad — 120 gsm, honest tooth</span>
+            <span>nothing you draw leaves this page</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ the range ============ -->
+  <section id="range" class="range">
+    <span class="wm" aria-hidden="true">120 gsm</span>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker mono reveal">[ The range ]</p>
+        <h2 class="reveal">Six things worth filling.</h2>
+        <p class="lede reveal">Every sheet is mould-made here, every book sewn here, every batch
+          numbered on the colophon page. If it doesn&rsquo;t take a wet nib without complaint,
+          it doesn&rsquo;t leave the mill.</p>
+      </div>
+
+      <div class="range-grid">
+        {goods.map((g, i) => (
+          <article class="good reveal" style={`--d:${(i % 3) * 0.1}s`}>
+            <div class="good-art"><RangeArt kind={g.kind} /></div>
+            <div class="good-info">
+              <div class="good-top"><h3>{g.name}</h3><span class="good-price">{g.price}</span></div>
+              <p class="good-spec mono">{g.spec}</p>
+              <p class="good-note">{g.note}</p>
+              <span class={`good-tag ${g.tagClass}`}>{g.tag}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ the mill ============ -->
+  <section id="mill" class="mill">
+    <div class="wrap mill-grid">
+      <div class="mill-copy">
+        <p class="kicker mono reveal">[ The mill ]</p>
+        <h2 class="reveal">One mould. <em>Eleven days.</em></h2>
+        <p class="reveal">A sheet of ours starts as cotton rag — offcuts from a shirt-maker two
+          towns over — beaten to pulp in a Hollander my grandfather bought in 1962 and never once
+          called by anything but <strong>“the beater.”</strong> The vatman dips the mould, gives it
+          the shake that locks the fibres, and lifts out one sheet. Then he does it again,
+          two hundred more times, and calls it a morning.</p>
+        <p class="reveal">The deckle is the loose frame that sits on the mould and holds the pulp
+          in. It never holds perfectly — a little always seeps beneath the wood, and that seep
+          dries into the ragged edge we&rsquo;re named for. <strong>A deckle edge isn&rsquo;t a
+          finish we add. It&rsquo;s the evidence we couldn&rsquo;t remove.</strong></p>
+        <p class="reveal">After pressing, the sheets hang in the drying loft for eleven days —
+          no heaters, just the weather doing its patient work — then take a bath of gelatin so
+          ink sits up on the surface instead of wicking through it. That&rsquo;s why a wet fountain
+          pen won&rsquo;t feather on our 120: the sheet was <em>sized</em> for it, three
+          generations before your pen was made.</p>
+        <p class="mill-sign reveal">— E. Marchetti, third of that name at the vat</p>
+        <figure class="mould-fig reveal">
+          <MouldDiagram />
+          <figcaption class="mould-cap mono">fig. 1 — the mould &amp; deckle, and where the edge happens</figcaption>
+        </figure>
+      </div>
+      <aside class="mill-card reveal" aria-label="Mill facts">
+        {millFacts.map(([k, v]) => (
+          <div class="mc-row"><span class="mono">{k}</span><span>{v}</span></div>
+        ))}
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ the counter — demo cart ============ -->
+  <section id="counter" class="counter">
+    <div class="wrap counter-grid">
+      <div class="counter-info">
+        <p class="kicker mono reveal">[ The counter ]</p>
+        <h2 class="reveal">Paid for like it&rsquo;s 1949.</h2>
+        <p class="counter-sub reveal">No baskets, no accounts, no urgency banners. Tell us what you
+          want and how many; we wrap it in kraft, tie it with string, and the till prints you an
+          honest total. Orders leave the mill on Thursdays, when the post van comes up the lane.</p>
+        <ul class="counter-list">
+          <li>ships Thursdays · wrapped in kraft, tied with string</li>
+          <li>batch number inked on every parcel</li>
+          <li>misprints go to the village school, not the bin</li>
+        </ul>
+      </div>
+      <div class="reveal" aria-live="polite">
+        <form id="cartForm" class="receipt" novalidate>
+          <p class="receipt-head"><strong>Deckle</strong> the mill counter · till no. 1</p>
+          <div class="r-field">
+            <label for="cartItem">The item</label>
+            <select id="cartItem" name="item">
+              {cartItems.map((c) => (
+                <option value={c.value} data-price={c.price}>{c.label} — £{c.price}</option>
+              ))}
+            </select>
+          </div>
+          <div class="r-row">
+            <p class="r-ship">Postage on the house for orders over £30 —
+              under that, it&rsquo;s £3 and an apology.</p>
+            <div class="r-field">
+              <label for="cartQty">Qty</label>
+              <input id="cartQty" name="qty" type="number" inputmode="numeric" min="1" max="99" step="1" value="1" required />
+            </div>
+          </div>
+          <div class="r-total">
+            <span class="lbl">Total</span>
+            <output id="cartTotal" for="cartItem cartQty">£24</output>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Ring it up</button>
+          <p class="r-fine">Demo till — nothing is sent, nothing is charged. See the README.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap foot-top">
+    <span class="foot-brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 5 h17 l1.5 2 -1 2.4 1.4 2.6 -1.2 2.4 1.2 2.6 -1.4 2.4 1.2 2.6 -1.2 2.4 1 2.6 -1.5 2 h-17 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 12 h9 M10 17 h9 M10 22 h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".6"/></svg>
+      Deckle
+    </span>
+    <nav class="foot-links" aria-label="Footer">
+      <a href="#desk">The desk</a><a href="#range">The range</a><a href="#mill">The mill</a><a href="#counter">The counter</a><a href={`${base}guide/`}>Guide</a>
+    </nav>
+  </div>
+  <div class="wrap foot-bottom mono">
+    <span>© 2026 Deckle — a design-showcase concept, not a real mill. The paper, prices and the post van are fiction.</span>
+    <span>Designed &amp; built by Parable · <a href={`${base}guide/`}>How this was built →</a></span>
+  </div>
+</footer>
+
+<script is:inline>
+/* ============================================================
+   DECKLE — interactions. Vanilla, progressive: the page reads
+   fully without JS (ruling swap is pure CSS via :has()).
+   Signature: a pen-pressure doodle canvas — line weight follows
+   pointer speed, the way a wet nib follows a hand.
+   ============================================================ */
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+
+  /* ---------- theme toggle ---------- */
+  var themeBtn = document.getElementById('themeBtn');
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
+  function syncTheme() {
+    var dark = root.dataset.theme === 'dark';
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-pressed', String(dark));
+      themeBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    if (themeMeta) themeMeta.setAttribute('content', dark ? '#14171f' : '#ece3d1');
+  }
+  syncTheme();
+  if (themeBtn) themeBtn.addEventListener('click', function () {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('deckle-theme', root.dataset.theme); } catch (e) {}
+    syncTheme();
+    redrawPad(); // the ink on the pad follows the theme
+  });
+
+  /* ---------- paper mode: CSS :has() does the swap; JS only remembers ---------- */
+  var radios = document.querySelectorAll('input[name="paper"]');
+  try {
+    var savedPaper = localStorage.getItem('deckle-paper');
+    if (savedPaper) radios.forEach(function (r) { r.checked = (r.value === savedPaper); });
+  } catch (e) {}
+  radios.forEach(function (r) {
+    r.addEventListener('change', function () {
+      try { localStorage.setItem('deckle-paper', r.value); } catch (e) {}
+    });
+  });
+
+  /* ---------- hero intro ---------- */
+  var hero = document.querySelector('.hero');
+  if (hero) requestAnimationFrame(function () { requestAnimationFrame(function () { hero.classList.add('loaded'); }); });
+
+  /* ---------- reveals ---------- */
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+  /* ---------- counters (markup carries the final value; JS only animates) ---------- */
+  if (!reduce) {
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target, to = parseFloat(el.dataset.to);
+        cio.unobserve(el);
+        var t0 = performance.now(), dur = 1300;
+        (function tick(t) {
+          var p = clamp((t - t0) / dur, 0, 1);
+          el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(tick);
+        })(t0);
+      });
+    }, { threshold: 0.6 });
+    document.querySelectorAll('.c-num').forEach(function (el) { el.textContent = '0'; cio.observe(el); });
+  }
+
+  /* ---------- the till — demo cart line ---------- */
+  var cartForm = document.getElementById('cartForm');
+  var cartItem = document.getElementById('cartItem');
+  var cartQty = document.getElementById('cartQty');
+  var cartTotal = document.getElementById('cartTotal');
+  function ringTotal() {
+    if (!cartItem || !cartQty || !cartTotal) return;
+    var price = parseFloat(cartItem.selectedOptions[0].dataset.price || '0');
+    var qty = clamp(Math.round(parseFloat(cartQty.value) || 0), 0, 99);
+    var goodsTotal = price * qty;
+    var post = goodsTotal > 0 && goodsTotal < 30 ? 3 : 0;
+    cartTotal.textContent = '£' + (goodsTotal + post) + (post ? ' (incl. £3 post)' : '');
+  }
+  if (cartForm) {
+    ringTotal();
+    cartItem.addEventListener('change', ringTotal);
+    cartQty.addEventListener('input', ringTotal);
+    cartForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var q = Math.round(parseFloat(cartQty.value));
+      if (!(q >= 1 && q <= 99)) {
+        cartQty.setCustomValidity('Between 1 and 99 — the post van is small.');
+        cartQty.reportValidity();
+        cartQty.addEventListener('input', function () { cartQty.setCustomValidity(''); }, { once: true });
+        return;
+      }
+      var total = cartTotal.textContent;
+      cartForm.innerHTML =
+        '<div class="receipt-done"><strong>Wrapped and on the shelf.</strong>' +
+        '<span class="stamp">received — till no. 1</span>' +
+        '<span class="mono">' + total + ' · demo only — nothing was sent, nothing was charged.<br/>the real van still only comes on thursdays.</span></div>';
+    });
+  }
+
+  /* ============================================================
+     The doodle pad. Pointer speed is the pressure proxy:
+     slow strokes run wet (wide), fast strokes go lean (thin).
+     Strokes are kept so the pad survives resize + theme flips.
+     No idle rAF loop — the canvas only paints on input.
+     ============================================================ */
+  var pad = document.getElementById('pad');
+  var padWrap = document.getElementById('padWrap');
+  var redrawPad = function () {};
+  if (pad && pad.getContext) {
+    var ctx = pad.getContext('2d');
+    var strokes = [];      // [{ tool: 'ink'|'hl', pts: [{x,y,w}] }]
+    var cur = null, lastPt = null, lastT = 0, lastW = null;
+    var tool = 'ink';
+    var HL_W = 16;
+
+    var dpr = function () { return Math.min(window.devicePixelRatio || 1, 1.5); };
+    var inkColor = function () {
+      return getComputedStyle(root).getPropertyValue('--pen').trim() || '#14171f';
+    };
+    var hlColor = 'rgba(242, 193, 78, .45)';
+
+    /* nib model: width from speed (px/ms), eased so it swells, not jitters */
+    function nibWidth(v) {
+      var t = 1 + (6.5 - 1) * Math.exp(-v / 0.55);
+      if (reduce || lastW === null) { lastW = reduce ? 2.6 : t; return lastW; }
+      lastW += (t - lastW) * 0.3; // the smoothing — skipped under reduced motion
+      return lastW;
+    }
+
+    function segment(p0, a, b) {
+      ctx.beginPath();
+      ctx.lineWidth = (a.w + b.w) / 2;
+      var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      if (!p0) { ctx.moveTo(a.x, a.y); ctx.lineTo(mx, my); }
+      else {
+        ctx.moveTo((p0.x + a.x) / 2, (p0.y + a.y) / 2);
+        ctx.quadraticCurveTo(a.x, a.y, mx, my);
+      }
+      ctx.stroke();
+    }
+
+    function setPen(s) {
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = s.tool === 'hl' ? hlColor : inkColor();
+      ctx.fillStyle = ctx.strokeStyle;
+    }
+
+    function drawStroke(s) {
+      var pts = s.pts;
+      if (!pts.length) return;
+      setPen(s);
+      if (pts.length === 1) {
+        ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, pts[0].w / 2, 0, 7); ctx.fill();
+        return;
+      }
+      for (var i = 1; i < pts.length; i++) segment(pts[i - 2], pts[i - 1], pts[i]);
+    }
+
+    function redraw() {
+      ctx.clearRect(0, 0, pad.width, pad.height);
+      strokes.forEach(drawStroke);
+    }
+    redrawPad = redraw;
+
+    function size() {
+      var r = pad.getBoundingClientRect();
+      pad.width = Math.max(1, Math.round(r.width * dpr()));
+      pad.height = Math.max(1, Math.round(r.height * dpr()));
+      ctx.setTransform(dpr(), 0, 0, dpr(), 0, 0);
+      redraw();
+    }
+    new ResizeObserver(size).observe(pad);
+    size();
+
+    function pos(e) {
+      var r = pad.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    pad.addEventListener('pointerdown', function (e) {
+      if (e.button > 0) return;
+      pad.setPointerCapture(e.pointerId);
+      padWrap.classList.add('marked');
+      var p = pos(e);
+      lastW = null; lastT = e.timeStamp;
+      var w = tool === 'hl' ? HL_W : (reduce ? 2.6 : 3.4);
+      cur = { tool: tool, pts: [{ x: p.x, y: p.y, w: w }] };
+      strokes.push(cur);
+      lastPt = cur.pts[0];
+      setPen(cur);
+      ctx.beginPath(); ctx.arc(p.x, p.y, w / 2, 0, 7); ctx.fill();
+      e.preventDefault();
+    });
+    pad.addEventListener('pointermove', function (e) {
+      if (!cur) return;
+      var p = pos(e);
+      var dx = p.x - lastPt.x, dy = p.y - lastPt.y;
+      var dist = Math.hypot(dx, dy);
+      if (dist < 1.4) return;
+      var v = dist / Math.max(1, e.timeStamp - lastT);
+      var w = tool === 'hl' ? HL_W : nibWidth(v);
+      var pt = { x: p.x, y: p.y, w: w };
+      cur.pts.push(pt);
+      var n = cur.pts.length;
+      setPen(cur);
+      segment(cur.pts[n - 3], cur.pts[n - 2], cur.pts[n - 1]);
+      lastPt = pt; lastT = e.timeStamp;
+    });
+    ['pointerup', 'pointercancel'].forEach(function (ev) {
+      pad.addEventListener(ev, function () { cur = null; lastW = null; });
+    });
+
+    /* pen buttons */
+    var penInk = document.getElementById('penInk');
+    var penHl = document.getElementById('penHl');
+    function pick(t) {
+      tool = t;
+      penInk.setAttribute('aria-pressed', String(t === 'ink'));
+      penHl.setAttribute('aria-pressed', String(t === 'hl'));
+    }
+    if (penInk) penInk.addEventListener('click', function () { pick('ink'); });
+    if (penHl) penHl.addEventListener('click', function () { pick('hl'); });
+
+    var padClear = document.getElementById('padClear');
+    if (padClear) padClear.addEventListener('click', function () {
+      strokes.length = 0; redraw(); padWrap.classList.remove('marked');
+    });
+
+    /* a sample flourish writes itself when the desk scrolls in —
+       spacing between its points varies, so the nib model gives it
+       real thick-and-thin. Reduced motion: one static frame. */
+    function samplePts() {
+      var r = pad.getBoundingClientRect(), w = r.width, h = r.height;
+      var pts = [], n = 110;
+      for (var i = 0; i < n; i++) {
+        var t = i / (n - 1);
+        var xt = t - 0.11 * Math.sin(t * Math.PI * 3);      // uneven pace = pressure
+        var x = (0.1 + 0.8 * xt) * w;
+        var y = (0.5 + 0.17 * Math.sin(t * Math.PI * 2.2) - 0.05 * Math.sin(t * Math.PI * 9) * (1 - t)) * h;
+        pts.push({ x: x, y: y });
+      }
+      return pts;
+    }
+    function widthsFor(pts) {
+      var out = [], prev = null;
+      for (var i = 0; i < pts.length; i++) {
+        var d = i === 0 ? 2 : Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+        var t = 1 + 5.5 * Math.exp(-(d / 14) / 0.55);
+        prev = prev === null ? t : prev + (t - prev) * 0.3;
+        out.push(prev);
+      }
+      return out;
+    }
+    var sampleDone = false;
+    function runSample() {
+      if (sampleDone) return; sampleDone = true;
+      var pts = samplePts(), ws = widthsFor(pts);
+      var s = { tool: 'ink', pts: [] };
+      strokes.unshift(s);
+      if (reduce) {           // ONE static frame — no animation
+        pts.forEach(function (p, i) { s.pts.push({ x: p.x, y: p.y, w: 2.6 }); });
+        redraw();
+        return;
+      }
+      var i = 0, t0 = performance.now(), dur = 900; // time-based: survives throttled frames
+      (function step() {
+        var target = Math.ceil(clamp((performance.now() - t0) / dur, 0, 1) * pts.length);
+        while (i < target) {
+          s.pts.push({ x: pts[i].x, y: pts[i].y, w: ws[i] });
+          var n2 = s.pts.length;
+          if (n2 > 1) { setPen(s); segment(s.pts[n2 - 3], s.pts[n2 - 2], s.pts[n2 - 1]); }
+          i++;
+        }
+        if (i < pts.length) requestAnimationFrame(step);
+      })();
+    }
+    var pio = new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) { runSample(); pio.disconnect(); }
+    }, { threshold: 0.5 });
+    pio.observe(pad);
+  }
+})();
+</script>
+</body>
+</html>

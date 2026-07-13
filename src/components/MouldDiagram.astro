@@ -1,0 +1,43 @@
+---
+// The mould & deckle, drawn flat — how the ragged edge happens.
+---
+<svg viewBox="0 0 640 300" role="img" aria-labelledby="mould-t mould-d">
+  <title id="mould-t">Diagram of a papermaking mould and deckle</title>
+  <desc id="mould-d">
+    An exploded drawing: the deckle — a removable wooden frame — floats above the
+    mould, a mesh-covered frame. Pulp settles inside the deckle; where it seeps
+    under the frame, the sheet dries into a ragged deckle edge.
+  </desc>
+  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+    <!-- the deckle, lifted -->
+    <path d="M150 40 L400 28 L472 66 L222 82 Z" />
+    <path d="M186 46 L392 36 L444 64 L238 74 Z" stroke-width="1.2" opacity=".6" />
+    <!-- drop lines -->
+    <path d="M150 40 V150 M472 66 V176 M400 28 V138 M222 82 V192" stroke-dasharray="2 5" stroke-width="1" opacity=".45" />
+    <!-- the mould -->
+    <path d="M150 150 L400 138 L472 176 L222 192 Z" />
+    <path d="M150 150 l0 14 L222 206 L222 192 M472 176 v14 L222 206 M400 138 v14" stroke-width="1.2" opacity=".7" />
+  </g>
+  <!-- the mesh -->
+  <g stroke="currentColor" stroke-width=".8" opacity=".4">
+    <path d="M170 149 L240 190 M195 148 L268 189 M220 147 L296 187 M245 145 L324 186 M270 144 L352 184 M295 143 L380 183 M320 142 L408 181 M345 141 L432 180 M370 140 L456 178" />
+    <path d="M162 156 L410 143 M180 166 L426 152 M200 176 L444 162" />
+  </g>
+  <!-- the pulp pooling to a ragged edge -->
+  <path d="M238 168 q60 -8 118 -4 q14 1 10 8 q-52 10 -112 6 q-20 -2 -16 -10 Z"
+    fill="var(--hl)" opacity=".55" stroke="none" />
+  <!-- labels -->
+  <g font-family="Space Mono, ui-monospace, monospace" font-size="11" fill="var(--dim)" letter-spacing="1">
+    <text x="492" y="52">THE DECKLE —</text>
+    <text x="492" y="66">lifts off</text>
+    <text x="492" y="182">THE MOULD —</text>
+    <text x="492" y="196">brass mesh</text>
+    <text x="24" y="244">WHERE PULP SEEPS UNDER THE FRAME,</text>
+    <text x="24" y="258">THE SHEET DRIES RAGGED — THE DECKLE EDGE.</text>
+  </g>
+  <g fill="none" stroke="var(--dim)" stroke-width="1" opacity=".7">
+    <path d="M488 48 L454 56" />
+    <path d="M488 178 L458 177" />
+    <path d="M120 236 q80 8 128 -50" stroke-dasharray="2 4" />
+  </g>
+</svg>
